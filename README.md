@@ -28,7 +28,11 @@ instalan solos lo que falte.
 ```
 python main.py
 ```
-o doble clic en [lanzar.bat](lanzar.bat).
+o doble clic en [lanzar.bat](lanzar.bat) (Windows). En Linux,
+[`./lanzar.sh`](lanzar.sh) hace lo mismo: crea `.venv` si falta, instala
+`requirements.txt` si `pywebview` no está disponible, y lanza `main.py`
+(necesita GTK3 + WebKit2GTK + PyGObject del sistema; en Arch:
+`pacman -S gtk3 webkit2gtk-4.1 python-gobject`).
 
 Al arrancar precarga varios streams en paralelo (barra de progreso ~5 s) y
 muestra la primera cámara de [cameras.py](cameras.py) (80 cámaras, ordenadas
@@ -114,10 +118,12 @@ la tarea diaria, cómo puntúa, formato de datos). Resumen:
 | `streams.py` | Resolución de URLs `.m3u8` desde rtsp.me/Angelcam (compartido por app y rutina) |
 | `mapthumb.py` | Genera el mapa SVG de ubicación (Asturias + costa gallega) |
 | `hls.min.js` | Librería hls.js embebida en la página (no es código propio) |
-| `lanzar.bat` | Lanza la app, instalando dependencias si faltan |
+| `lanzar.bat` | Lanza la app en Windows, instalando dependencias si faltan |
+| `lanzar.sh` | Lanza la app en Linux, instalando dependencias si faltan |
 | `captura_eclipse.py` | Rutina diaria de captura para el eclipse |
 | `evaluar_eclipse.py` | Genera timelapses e informes del eclipse |
 | `capturar.bat` | Lanza la captura diaria (para el Programador de tareas) |
+| `run_daily.sh` | Lanza la captura + evaluación diaria en Linux (cron/systemd) |
 | `ECLIPSE.md` | Documentación detallada de la campaña del eclipse |
 | `memoria/` | Copia de la memoria de contexto del proyecto (ver `memoria/MEMORY.md`) — no se sincroniza sola, es un volcado puntual |
 
