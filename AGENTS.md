@@ -60,6 +60,19 @@ Dos cosas independientes en el mismo repo:
   sesiones fuera del repo. No se sincroniza sola — si se actualiza la
   memoria real, hay que volver a copiarla aquí a mano si se quiere
   reflejar el cambio.
+- **En Linux, `pywebview` debe forzarse a Qt (`PYWEBVIEW_GUI=qt`), nunca
+  dejarlo en GTK** (backend por defecto ahí). Diagnosticado a fondo: con
+  GTK/WebKit2GTK, `hls.js` parsea bien el manifest y la playlist pero nunca
+  llega a pedir fragmentos (evento `hlsError`/`internalException` no fatal
+  al montar el buffer) — la cámara se queda en negro para siempre aunque el
+  stream funcione (mismo stream, mismo `hls.js`, en Chromium se ve bien al
+  servir el HTML por HTTP). Qt usa QtWebEngine (motor Chromium, como
+  WebView2 en Windows) y sí decodifica. `lanzar.sh` ya fuerza esto via env
+  var; necesita `python-pyqt6` + `python-pyqt6-webengine` (paquetes de
+  sistema, `sudo pacman -S ...`, no instalables por pip) y `qtpy` (sí por
+  pip, ya en el `.venv`). No "arreglar" esto tocando GTK/WebKit2GTK — es un
+  límite real de su soporte de Media Source Extensions, no una
+  configuración que falte.
 
 ## Peculiaridades del entorno de desarrollo (no del equipo de producción)
 

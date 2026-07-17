@@ -29,10 +29,23 @@ instalan solos lo que falte.
 python main.py
 ```
 o doble clic en [lanzar.bat](lanzar.bat) (Windows). En Linux,
-[`./lanzar.sh`](lanzar.sh) hace lo mismo: crea `.venv` si falta, instala
-`requirements.txt` si `pywebview` no está disponible, y lanza `main.py`
-(necesita GTK3 + WebKit2GTK + PyGObject del sistema; en Arch:
-`pacman -S gtk3 webkit2gtk-4.1 python-gobject`).
+[`./lanzar.sh`](lanzar.sh) hace lo mismo: crea `.venv` si falta e instala
+`requirements.txt` si `pywebview` no está disponible.
+
+**Backend de pywebview en Linux — usar Qt, no GTK**: el backend GTK/WebKit2GTK
+(el que pywebview elige por defecto en Linux) no consigue decodificar estos
+streams HLS vía `hls.js`/MediaSource — la cámara se queda en negro
+indefinidamente aunque el stream funcione perfectamente (comprobado: mismo
+stream, mismo `hls.js`, en Chromium se ve bien). `lanzar.sh` fuerza el
+backend Qt (`PYWEBVIEW_GUI=qt`), que usa QtWebEngine (motor Chromium, igual
+que WebView2 en Windows) y sí decodifica bien. Requiere paquetes de sistema
+que `pip` no puede instalar solo:
+
+```
+sudo pacman -S python-pyqt6 python-pyqt6-webengine
+```
+
+`lanzar.sh` avisa en pantalla si faltan.
 
 Al arrancar precarga varios streams en paralelo (barra de progreso ~5 s) y
 muestra la primera cámara de [cameras.py](cameras.py) (80 cámaras, ordenadas
