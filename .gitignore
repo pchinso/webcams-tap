@@ -16,3 +16,10 @@ env/
 # OS/editor noise
 .DS_Store
 Thumbs.db
+
+# Datos generados (campana del eclipse y grabaciones de la app)
+capturas/
+animaciones/
+reportes/
+grabaciones/
+test_page.html

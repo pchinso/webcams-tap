@@ -1,2 +1,7 @@
+# App de visualizacion
 pywebview>=6.0
 requests>=2.28
+
+# Rutina del eclipse (captura_eclipse.py / evaluar_eclipse.py)
+opencv-python>=4.8
+Pillow>=10.0
