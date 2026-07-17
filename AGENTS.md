@@ -92,6 +92,42 @@ del DOM) en vez de capturas de pantalla de la ventana nativa. Si tocas
 interfaz/JS sin instalar nada nuevo es ese mismo patrón: generar el HTML,
 servirlo por HTTP, abrirlo en un navegador normal.
 
+## Ejecución diaria de la rutina del eclipse (equipo Linux)
+
+En el equipo Linux que ejecuta la campaña diaria (distinto del usado para
+desarrollar), la ejecución real **no debe depender de una sesión interactiva
+de Claude Code**. Decisión (ver detalle completo en
+[establece_rutina_linux.md](establece_rutina_linux.md)):
+
+- El planificador del sistema operativo (`cron` o `systemd timer`) es quien
+  lanza [`run_daily.sh`](run_daily.sh) cada día a las **19:30** hora local
+  (la ventana de captura es 19:30–21:00; `captura_eclipse.py` ya espera y
+  corta solo, `run_daily.sh` no necesita `timeout` externo).
+- Claude Code con `/loop` puede usarse **solo como supervisión** adicional
+  (revisar logs, detectar fallos), nunca como el mecanismo principal de
+  disparo diario: si se cierra la sesión, se reinicia el equipo o `/loop`
+  no se recupera, no hay garantía de que la captura se lance.
+- Este equipo concreto (Arch/Omarchy) **no tiene `cron` instalado**
+  (`cronie` no está presente). Se usa un **systemd user timer** en su lugar
+  (`~/.config/systemd/user/webcams-eclipse.{service,timer}`), equivalente en
+  este caso a la receta de `cron` del documento de referencia. Si se
+  reinstala el equipo o se cambia de máquina, reevaluar si instalar `cronie`
+  o mantener systemd según lo que tenga esa máquina.
+- `run_daily.sh` usa `.venv/` (creado con `python3 -m venv .venv`) porque
+  Python del sistema en Arch es "externally managed" (PEP 668) y bloquea
+  `pip install` global; no asumir que las dependencias del eclipse
+  (`opencv-python`, `Pillow`, `requests`) están instaladas a nivel sistema.
+- Antes de activar el timer se validó con una prueba rápida
+  (`captura_eclipse.py --ahora 1`, 70/80 cámaras, formato correcto en
+  `capturas/`) que el entorno funciona (mismo criterio que el documento de
+  referencia para `cron`: no programar sin probar antes).
+- Estado a 17-07-2026: timer **activo**
+  (`systemctl --user enable --now webcams-eclipse.timer`) con
+  `loginctl enable-linger chinso` para que se dispare aunque no haya sesión
+  gráfica iniciada. Comprobar con
+  `systemctl --user list-timers webcams-eclipse.timer` y revisar
+  `logs/daily.log` tras la primera ejecución real.
+
 ## Fuentes de datos (contexto de por qué son de fiar)
 
 - Cámaras: red **Webcams de Asturias** / **Hispacams**
