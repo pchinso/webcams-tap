@@ -52,7 +52,10 @@ Abre después `reportes\reporte-global.html` (ranking acumulado) o los
 ## Detalles técnicos
 
 - Los frames se extraen del stream HLS con OpenCV/ffmpeg (1280 px de ancho,
-  JPEG). ~90 frames por cámara y día; unos 500 MB/día de disco para 80 cámaras.
+  JPEG). ~90 frames por cámara y día; unos 550 MB/día de disco para las 88
+  cámaras (80 hasta 18-07-2026, +8 de Fisterra/Muxía/A Coruña/Ferrol/
+  Ortigueira añadidas el 19-07-2026 al final de `cameras.py`, índices 80-87,
+  sin afectar a la serie histórica de las 80 anteriores).
 - Los streams de rtsp.me se "duermen" sin espectadores y devuelven una
   playlist placeholder; la captura los despierta imitando a su reproductor
   (cookies de sesión + sondeo de playlist). Cámaras caídas en origen quedan

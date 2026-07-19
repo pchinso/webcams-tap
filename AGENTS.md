@@ -10,7 +10,7 @@ está hecho así" y decisiones a respetar.
 Dos cosas independientes en el mismo repo:
 
 1. **App de escritorio** (`main.py` + `cameras.py` + `streams.py` +
-   `mapthumb.py` + `hls.min.js`): visor de 80 webcams públicas del
+   `mapthumb.py` + `hls.min.js`): visor de 88 webcams públicas del
    Cantábrico (Asturias + costa gallega de Estaca de Bares), con
    navegación por teclado/ratón, buffer para cambio instantáneo, detección
    de cámaras muertas, meteo en vivo, modo loop y grabación.
@@ -147,6 +147,17 @@ de Claude Code**. Decisión (ver detalle completo en
   (`webcamsdeasturias.com`, `hispacams.com`), rastreadas por categoría
   (playas, puertos, comunidades limítrofes) para cubrir toda la costa; una
   cámara de Viveiro viene de Hispacams pero usa Angelcam como proveedor de
-  vídeo en vez de rtsp.me.
+  vídeo en vez de rtsp.me. Las 8 cámaras de Fisterra→Ortigueira (índices
+  80-87, añadidas 19-07-2026) vienen de Hispacams (Fisterra, rtsp.me) y de
+  **G24/CRTVG** (`g24.gal`, radiotelevisión pública de Galicia) para el
+  resto — streams `.m3u8` propios en `crtvg.es`, permanentes y sin
+  necesidad de "despertar" (siempre en directo). Se probaron muchas otras
+  fuentes para el tramo Costa da Morte (Camariñas, Malpica, Laxe, Cedeira,
+  Cariño) sin éxito: `camaramar.com` cataloga esos puntos pero la mayoría
+  no tiene cámara activa asociada (`"webcam":[]` en su Livewire), o solo
+  ofrece un bucle grabado (`VODgrabaciones/...`), no directo real. Si se
+  quiere ampliar esa zona más adelante, revisar de nuevo `camaramar.com`
+  (puede que activen cámaras que hoy están vacías) o buscar webcams
+  municipales propias de esos concellos.
 - Meteo: **Open-Meteo** (`api.open-meteo.com`), API pública sin clave,
   consultada por lotes (todas las cámaras en una sola petición HTTP).

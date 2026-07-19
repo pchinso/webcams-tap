@@ -1,11 +1,11 @@
 """Genera un mapa SVG simplificado (Asturias + costa norte de Galicia)
 con un marcador de ubicacion."""
 
-# Bounding box: desde la zona de Estaca de Bares hasta el oriente asturiano
-LON_MIN, LON_MAX = -7.95, -4.50
+# Bounding box: desde Fisterra hasta el oriente asturiano
+LON_MIN, LON_MAX = -9.40, -4.50
 LAT_MIN, LAT_MAX = 42.85, 43.85
 
-WIDTH, HEIGHT = 230, 96
+WIDTH, HEIGHT = 330, 96
 
 # Silueta simplificada de Asturias (lon, lat). No es topograficamente
 # exacta: sirve como referencia visual de ubicacion en una miniatura.
@@ -17,12 +17,19 @@ OUTLINE_ASTURIAS = [
     (-7.05, 43.26), (-7.18, 43.46), (-7.05, 43.58),
 ]
 
-# Franja costera del norte de Galicia (A Marina / Ortegal), con la punta
-# de Estaca de Bares, para ubicar las camaras gallegas.
+# Franja costera del norte de Galicia (A Marina / Ortegal / Ferrolterra /
+# A Coruna / Costa da Morte), con la punta de Estaca de Bares y Fisterra,
+# para ubicar las camaras gallegas.
 OUTLINE_GALICIA = [
     (-7.04, 43.56), (-7.25, 43.60), (-7.35, 43.68), (-7.45, 43.71),
     (-7.60, 43.70), (-7.66, 43.75), (-7.70, 43.79), (-7.75, 43.75),
-    (-7.88, 43.70), (-7.90, 43.55), (-7.70, 43.40), (-7.40, 43.35),
+    (-7.88, 43.70), (-7.90, 43.55),
+    (-7.95, 43.48), (-8.10, 43.45), (-8.25, 43.48), (-8.35, 43.42),
+    (-8.40, 43.37), (-8.55, 43.31), (-8.75, 43.34), (-8.90, 43.28),
+    (-9.05, 43.24), (-9.15, 43.15), (-9.22, 43.11), (-9.29, 42.98),
+    (-9.29, 42.89), (-9.15, 42.87), (-9.00, 42.93), (-8.80, 42.95),
+    (-8.55, 42.92), (-8.30, 42.95), (-8.00, 43.05), (-7.75, 43.18),
+    (-7.55, 43.28), (-7.40, 43.35),
     (-7.10, 43.40), (-7.05, 43.47), (-7.04, 43.56),
 ]
 

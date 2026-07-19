@@ -48,9 +48,12 @@ sudo pacman -S python-pyqt6 python-pyqt6-webengine
 `lanzar.sh` avisa en pantalla si faltan.
 
 Al arrancar precarga varios streams en paralelo (barra de progreso ~5 s) y
-muestra la primera cámara de [cameras.py](cameras.py) (80 cámaras, ordenadas
-de oeste a este siguiendo la costa: Viveiro → La Franca, con 4 cámaras de
-interior al final).
+muestra la primera cámara de [cameras.py](cameras.py) (88 cámaras: las 80
+originales ordenadas de oeste a este siguiendo la costa Viveiro → La Franca,
+con 4 cámaras de interior al final, y 8 cámaras más de Fisterra/Muxía/A
+Coruña/Ferrol/Ortigueira añadidas después, sin reordenar la lista para no
+romper los índices que usa la campaña del eclipse — ver
+[AGENTS.md](AGENTS.md)).
 
 **Controles:**
 | Acción | Tecla/ratón |
@@ -95,7 +98,7 @@ la derecha cuando están activos.
   veces seguidas → mala). Las cámaras marcadas malas se **saltan** al
   navegar (nunca se borran de la lista: se reintentan solas a los 10 min).
 - **Meteo**: temperatura/nubes/visibilidad de Open-Meteo (API pública sin
-  clave), una sola petición por lotes para las 80 cámaras, cacheada 10 min.
+  clave), una sola petición por lotes para las 88 cámaras, cacheada 10 min.
 - Ver las constantes configurables al principio de `main.py`
   (`BUFFER_AHEAD`, `WARMUP_MS`, `WEATHER_MAX_AGE`, `HEALTH_INTERVAL`,
   `LOOP_SECONDS`).
@@ -127,7 +130,7 @@ la tarea diaria, cómo puntúa, formato de datos). Resumen:
 | Archivo | Qué es |
 |---|---|
 | `main.py` | App de visualización (ventana pywebview) |
-| `cameras.py` | Lista de las 80 cámaras: pueblo, título, lat/lon, URL embed |
+| `cameras.py` | Lista de las 88 cámaras: pueblo, título, lat/lon, URL embed |
 | `streams.py` | Resolución de URLs `.m3u8` desde rtsp.me/Angelcam (compartido por app y rutina) |
 | `mapthumb.py` | Genera el mapa SVG de ubicación (Asturias + costa gallega) |
 | `hls.min.js` | Librería hls.js embebida en la página (no es código propio) |
@@ -154,6 +157,14 @@ Cada entrada de `cameras.py` es:
 Para encontrar el `embed_url` de una cámara de `webcamsdeasturias.com`:
 abrir su página, buscar en el HTML el `<iframe src="https://rtsp.me/embed/...">`
 (o el de `v.angelcam.com/iframe?v=...` para las de Hispacams/Viveiro).
+`embed_url` no tiene por qué ser rtsp.me/Angelcam: vale cualquier página cuyo
+HTML contenga en claro (o con `\/` escapado, como G24/CRTVG) una URL
+`.m3u8` — ver `streams.py: M3U8_RE`/`_extract_m3u8`.
+
+**Mientras haya campaña del eclipse en marcha, añadir cámaras siempre al
+final de la lista, nunca insertarlas ni reordenar** — ver la nota
+correspondiente en [AGENTS.md](AGENTS.md) sobre por qué (índices de
+`capturas/` por posición).
 
 ## Estado conocido a 17-07-2026
 

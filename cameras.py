@@ -495,4 +495,61 @@ CAMERAS = [
         "lat": 42.9897, "lon": -5.7639,
         "embed_url": "https://rtsp.me/embed/rZFSk9tT/",
     },
+
+    # ---- Galicia: Costa da Morte / A Coruña / Ferrol / Ortigueira ----
+    # Añadidas al FINAL a propósito, no reordenadas por posición geográfica:
+    # captura_eclipse.py indexa las carpetas de capturas/ por posición en
+    # esta lista (slug() -> "NN-..."), y ya hay campaña en marcha (desde
+    # 17-07-2026). Insertarlas antes desplazaría el índice de las 80
+    # cámaras existentes y rompería la serie histórica. Fuentes: Hispacams
+    # (rtsp.me) para Fisterra, y G24/CRTVG (radiotelevisión pública de
+    # Galicia, streams .m3u8 propios y permanentes) para el resto.
+    {
+        "town": "Fisterra (A Coruña)",
+        "title": "Puerto de Finisterre",
+        "lat": 42.9052, "lon": -9.2607,
+        "embed_url": "https://rtsp.me/embed/irH5ShN2/",
+    },
+    {
+        "town": "Fisterra (A Coruña)",
+        "title": "Playa Langosteira",
+        "lat": 42.8958, "lon": -9.2711,
+        "embed_url": "https://rtsp.me/embed/3htHTKKr/",
+    },
+    {
+        "town": "Fisterra (A Coruña)",
+        "title": "Cabo Fisterra",
+        "lat": 42.8797, "lon": -9.2879,
+        "embed_url": "https://www.g24.gal/-/cabo-fisterra",
+    },
+    {
+        "town": "Muxía (A Coruña)",
+        "title": "Muxía",
+        "lat": 43.1043, "lon": -9.2196,
+        "embed_url": "https://www.g24.gal/-/mux%C3%ADa",
+    },
+    {
+        "town": "A Coruña",
+        "title": "A Coruña - panorámica fija",
+        "lat": 43.3623, "lon": -8.4115,
+        "embed_url": "https://www.g24.gal/-/a-coru%C3%B1a-fixa-",
+    },
+    {
+        "town": "A Coruña",
+        "title": "A Coruña - cámara móvil",
+        "lat": 43.3623, "lon": -8.4115,
+        "embed_url": "https://www.g24.gal/-/a-coru%C3%B1a-1",
+    },
+    {
+        "town": "Ferrol (A Coruña)",
+        "title": "Ferrol",
+        "lat": 43.4832, "lon": -8.2372,
+        "embed_url": "https://www.g24.gal/-/ferrol",
+    },
+    {
+        "town": "Ortigueira (A Coruña)",
+        "title": "Ortigueira",
+        "lat": 43.6924, "lon": -7.8532,
+        "embed_url": "https://www.g24.gal/-/ortigueira",
+    },
 ]

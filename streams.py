@@ -16,8 +16,9 @@ STREAM_URL_MAX_AGE = 40 * 60  # refrescar el token pasados 40 minutos
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
 # URL .m3u8 dentro del HTML del reproductor (rtsp.me la incluye en claro;
-# Angelcam la incluye con escapes \\uXXXX y %XX que hay que deshacer).
-M3U8_RE = re.compile(r"https://[^\s\"'<>]+?\.m3u8[^\s\"'<>]*")
+# Angelcam la incluye con escapes \\uXXXX y %XX que hay que deshacer; CRTVG/
+# G24 la incluye dentro de un literal JS con las barras escapadas \/).
+M3U8_RE = re.compile(r"https:\\?/\\?/[^\s\"'<>]+?\.m3u8[^\s\"'<>]*")
 
 
 def _http_get(url):
@@ -38,6 +39,8 @@ def _extract_m3u8(html):
         url = url.encode("ascii", "ignore").decode("unicode_escape")
     if "%" in url:
         url = requests.utils.unquote(url)
+    if "\\/" in url:
+        url = url.replace("\\/", "/")
     return url
 
 
