@@ -41,7 +41,7 @@ import requests  # noqa: E402
 import urllib.parse  # noqa: E402
 
 from cameras import CAMERAS  # noqa: E402
-from streams import HEADERS, M3U8_RE, _extract_m3u8, fetch_weather  # noqa: E402
+from streams import HEADERS, fetch_weather, resolve_stream_url  # noqa: E402
 
 # ---- Configuracion ----
 WINDOW_START = "19:30"   # hora local de inicio de la ventana de captura
@@ -63,8 +63,6 @@ def slug(index, cam):
 
 import re as _re  # noqa: E402
 
-SESSION_JS_RE = _re.compile(
-    r"src=.(https://[a-z0-9]+\.rtsp\.me/[A-Za-z0-9_-]+/\d+/hls/[A-Za-z0-9]+\.js\?time=\d+)")
 PLACEHOLDER_RE = _re.compile(r"-40\d\.ts$")
 
 # Cache por camara: (url, epoch del ultimo exito). Mientras el stream siga
@@ -83,7 +81,7 @@ def _playlist_is_real(text):
 
 def wake_stream(index, timeout=45):
     """Despierta un stream rtsp.me dormido imitando a su reproductor:
-    pagina embed (cookies de sesion), .js de sesion, sondeo de la playlist
+    resuelve la URL .m3u8 (via resolve_stream_url) y sondea la playlist
     cada segundo tocando los segmentos placeholder. Devuelve la URL .m3u8
     activa, o None si no despierta en `timeout` segundos."""
     cam = CAMERAS[index]
@@ -91,17 +89,20 @@ def wake_stream(index, timeout=45):
     s.headers.update(HEADERS)
     s.verify = False
     try:
-        emb = s.get(cam["embed_url"], timeout=15).text
-        url = _extract_m3u8(emb)
+        url = resolve_stream_url(cam["embed_url"], session=s)
         if not url:
             return None
-        jsm = SESSION_JS_RE.search(emb)
-        if jsm:
-            s.get(jsm.group(1), timeout=10)
         base = url.rsplit("/", 1)[0] + "/"
         t0 = time.time()
         while time.time() - t0 < timeout:
-            pl = s.get(url, timeout=10).text
+            try:
+                pl = s.get(url, timeout=10).text
+            except Exception:
+                # el transcoder bajo demanda puede tardar en arrancar la
+                # primera vez; un timeout aqui no significa que no vaya a
+                # despertar, solo que aun no responde.
+                time.sleep(1)
+                continue
             if _playlist_is_real(pl):
                 return url
             segs = [l for l in pl.splitlines() if l and not l.startswith("#")]

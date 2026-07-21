@@ -20,6 +20,12 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
 # G24 la incluye dentro de un literal JS con las barras escapadas \/).
 M3U8_RE = re.compile(r"https:\\?/\\?/[^\s\"'<>]+?\.m3u8[^\s\"'<>]*")
 
+# rtsp.me rediseno su pagina de embed (~21-07-2026): ya no sirve el .m3u8 en
+# el HTML (ahora es una SPA vacia), hay que resolverlo via su API de sesion.
+# Ver _resolve_rtspme().
+RTSPME_EMBED_RE = re.compile(r"^https://rtsp\.me/embed/[A-Za-z0-9]+/?$")
+RTSPME_KEY_RE = re.compile(r"sub\s*:\s*'([^']+)'")
+
 
 def _http_get(url):
     try:
@@ -44,6 +50,42 @@ def _extract_m3u8(html):
     return url
 
 
+def _resolve_rtspme(embed_url, session=requests):
+    """Resuelve la URL .m3u8 real de una camara rtsp.me via su API de sesion.
+
+    Desde el rediseno, `GET {embed_url}session/` (con Referer=embed_url,
+    si no da 403 forbidden_origin) devuelve JSON con `stream.hlsTemplate`
+    (tiene un placeholder "{key}") y `stream.keyJs`, una URL .js que al
+    pedirla devuelve `var hash = {sub: '...', main: '...'}`. `sub` es la
+    key que hay que sustituir en la plantilla (`main` da 403 en las
+    pruebas; no esta claro por que, pero "sub" es lo que funciona)."""
+    headers = dict(HEADERS, Referer=embed_url)
+    try:
+        data = session.get(
+            embed_url.rstrip("/") + "/session/", headers=headers, timeout=15
+        ).json()
+        stream = data["stream"]
+        key_js = session.get(stream["keyJs"], headers=headers, timeout=15).text
+        m = RTSPME_KEY_RE.search(key_js)
+        if not m:
+            return None
+        return stream["hlsTemplate"].replace("{key}", m.group(1))
+    except Exception:
+        return None
+
+
+def resolve_stream_url(embed_url, session=requests):
+    """Resuelve la URL .m3u8 de cualquier embed_url soportado (rtsp.me,
+    Angelcam, G24/CRTVG, o cualquier pagina con un .m3u8 en el HTML)."""
+    if RTSPME_EMBED_RE.match(embed_url):
+        return _resolve_rtspme(embed_url, session=session)
+    try:
+        html = session.get(embed_url, headers=HEADERS, timeout=15).text
+    except (requests.exceptions.SSLError, OSError):
+        html = session.get(embed_url, headers=HEADERS, timeout=15, verify=False).text
+    return _extract_m3u8(html)
+
+
 class StreamResolver:
     """Extrae y cachea las URLs .m3u8 tokenizadas de las paginas embed."""
 
@@ -59,7 +101,7 @@ class StreamResolver:
         if hit and not force and time.time() - hit[1] < STREAM_URL_MAX_AGE:
             return hit[0]
         try:
-            url = _extract_m3u8(_http_get(self.cameras[index]["embed_url"]))
+            url = resolve_stream_url(self.cameras[index]["embed_url"])
         except Exception:
             url = None
         if not url:

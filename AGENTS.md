@@ -29,18 +29,39 @@ Dos cosas independientes en el mismo repo:
   (iframe). Se probó primero y el problema es real: ese reproductor exige
   un clic del usuario para arrancar y, al ser de otro origen, ni la app ni
   el usuario pueden dárselo de forma fiable (la capa de control de la app
-  intercepta los clics). La solución fue extraer la URL `.m3u8` real
-  (`streams.py: _extract_m3u8`) y reproducirla con `hls.js` sobre un
-  `<video muted autoplay>` propio.
+  intercepta los clics). La solución fue extraer/resolver la URL `.m3u8`
+  real (`streams.py: resolve_stream_url`) y reproducirla con `hls.js`
+  sobre un `<video muted autoplay>` propio.
+- **rtsp.me rediseñó su página de embed el 21-07-2026** (pasó de servir el
+  `.m3u8` en claro dentro del HTML a una SPA vacía sin contenido en el
+  HTML inicial) y rompió la captura de ~81/88 cámaras de un día para
+  otro (detectado por el informe ejecutivo del `/loop` de supervisión).
+  Arreglado el mismo día: `streams.py: _resolve_rtspme()` ahora resuelve
+  vía su API de sesión — `GET {embed_url}session/` (requiere header
+  `Referer` igual al `embed_url`, si no da `403 forbidden_origin`)
+  devuelve JSON con `stream.hlsTemplate` (con un placeholder `{key}`) y
+  `stream.keyJs` (URL `.js` que al pedirla —con el mismo Referer— devuelve
+  `var hash = {sub: '...', main: '...'}`); `hash.sub` es la key a
+  sustituir en la plantilla (`main` da 403 en las pruebas, no está claro
+  por qué, pero `sub` es lo que funciona). Los segmentos también
+  cambiaron de `.ts` a `.m4s` (fMP4/CMAF) — sin problema, OpenCV/ffmpeg
+  los decodifica igual. Si rtsp.me vuelve a cambiar el formato, revisar
+  primero con `curl`/DevTools si `{embed_url}session/` sigue existiendo
+  antes de asumir que hay que rehacer todo el mecanismo.
 - **Los streams de rtsp.me "duermen" sin espectadores** y sirven una
-  playlist con segmentos placeholder (nombre terminado en `-40x.ts`, ver
-  `captura_eclipse.py: PLACEHOLDER_RE`) en vez de vídeo real. La rutina de
-  captura los despierta imitando el comportamiento del reproductor
-  (`wake_stream()`: página embed con cookies de sesión → su `.js` de
-  sesión → sondeo de la playlist tocando segmentos hasta que cambian a
-  reales). Sin esto, la captura por lotes solo conseguía ~25/80 cámaras en
-  vez de ~71/80. La app normal no necesita esto porque hls.js reproduciendo
-  activamente ya actúa como espectador y despierta el stream solo.
+  playlist con segmentos placeholder (con el formato antiguo, nombre
+  terminado en `-40x.ts`, ver `captura_eclipse.py: PLACEHOLDER_RE` —
+  no se ha confirmado si el formato `.m4s` nuevo tiene un equivalente;
+  en las pruebas tras el 21-07 los streams respondían con contenido real
+  ya en el primer intento, sin necesitar el sondeo) en vez de vídeo real.
+  La rutina de captura los despierta imitando el comportamiento del
+  reproductor (`wake_stream()`: resuelve la URL → sondeo de la playlist
+  tocando segmentos hasta que cambian a reales, con reintento si la
+  primera respuesta da timeout — el transcoder bajo demanda a veces
+  tarda en arrancar). Sin esto, la captura por lotes solo conseguía
+  ~25/80 cámaras en vez de ~71-80/88. La app normal no necesita el
+  sondeo porque hls.js reproduciendo activamente ya actúa como
+  espectador y despierta el stream solo.
 - **No borrar cámaras caídas de `cameras.py`**. El usuario pidió
   explícitamente no eliminar fuentes que fallan puntualmente porque pueden
   volver a funcionar. Tanto la app (marca "mala" temporal, reintenta a los

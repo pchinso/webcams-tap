@@ -71,21 +71,23 @@ la derecha cuando están activos.
 ### Cómo funciona por dentro (para no romperlo sin saberlo)
 
 - Las cámaras son streams HLS. Casi todas vienen de **rtsp.me** (la web
-  `webcamsdeasturias.com` embebe su reproductor); una (Viveiro) usa
-  **Angelcam**. En vez de usar su reproductor embebido (exige clic manual
-  para arrancar, imposible de automatizar desde un iframe de otro origen),
-  [`streams.py`](streams.py) **extrae la URL `.m3u8` real** de la página
-  embed y la reproduce con `hls.js` sobre un `<video muted autoplay>`
-  propio — así siempre está en reproducción sin intervención.
+  `webcamsdeasturias.com` embebe su reproductor), unas pocas de
+  **G24/CRTVG** y una (Viveiro) de **Angelcam**. En vez de usar el
+  reproductor embebido de cada una (exige clic manual para arrancar,
+  imposible de automatizar desde un iframe de otro origen),
+  [`streams.py`](streams.py) **resuelve la URL `.m3u8` real**
+  (`resolve_stream_url`) y la reproduce con `hls.js` sobre un
+  `<video muted autoplay>` propio — así siempre está en reproducción sin
+  intervención. rtsp.me se resuelve vía su API de sesión JSON
+  (`_resolve_rtspme`, ver detalle en [AGENTS.md](AGENTS.md)); el resto,
+  buscando el `.m3u8` en claro en el HTML de la página embed.
 - La URL `.m3u8` lleva un token que caduca (~40 min): se refresca sola si
   el reproductor falla.
-- **Los streams de rtsp.me "duermen" sin espectadores** y devuelven una
-  playlist con segmentos placeholder (nombre acabado en `-40x.ts`) en vez
-  de vídeo real. Para "despertarlos" hay que imitar a su reproductor:
-  cargar la página embed (cookies de sesión), su `.js` de sesión, y sondear
-  la playlist tocando los segmentos hasta que aparecen los reales. Esto
-  está implementado en `wake_stream()` dentro de
-  [`captura_eclipse.py`](captura_eclipse.py); la app (`main.py`) no lo
+- **Los streams de rtsp.me "duermen" sin espectadores** y pueden devolver
+  contenido placeholder en vez de vídeo real hasta que alguien los "mira".
+  La rutina de captura los despierta en `wake_stream()` dentro de
+  [`captura_eclipse.py`](captura_eclipse.py) (resuelve la URL y sondea la
+  playlist hasta que aparece contenido real); la app (`main.py`) no lo
   necesita porque hls.js reproduciendo activamente ya cuenta como
   "espectador" y el stream despierta solo en unos segundos.
 - **Buffer de reproducción**: para que cambiar de cámara sea instantáneo,
@@ -159,7 +161,8 @@ abrir su página, buscar en el HTML el `<iframe src="https://rtsp.me/embed/...">
 (o el de `v.angelcam.com/iframe?v=...` para las de Hispacams/Viveiro).
 `embed_url` no tiene por qué ser rtsp.me/Angelcam: vale cualquier página cuyo
 HTML contenga en claro (o con `\/` escapado, como G24/CRTVG) una URL
-`.m3u8` — ver `streams.py: M3U8_RE`/`_extract_m3u8`.
+`.m3u8`, o una página `rtsp.me/embed/<id>/` (se resuelve vía su API de
+sesión) — ver `streams.py: resolve_stream_url`.
 
 **Mientras haya campaña del eclipse en marcha, añadir cámaras siempre al
 final de la lista, nunca insertarlas ni reordenar** — ver la nota
